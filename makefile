@@ -1,5 +1,5 @@
 # Makefile for building a C project
-# This Makefile compiles .c files into .o files and links them into an executable.
+# This Makefile compiles .c files into .o files and links them into an executable file.
 
 # --- Define short forms for commonly used commands ---
 MKDIR = mkdir -p            # Use -p to create parent directories as needed
