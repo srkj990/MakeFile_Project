@@ -1,0 +1,118 @@
+
+Memory Configuration
+
+Name             Origin             Length             Attributes
+FLASH            0x0000000008000000 0x0000000000080000 xr
+RAM              0x0000000020000000 0x0000000000020000 rw
+*default*        0x0000000000000000 0xffffffffffffffff
+
+Linker script and memory map
+
+LOAD objects/sample1.o
+LOAD objects/sample2.o
+LOAD objects/startup.o
+LOAD objects/syscalls.o
+
+.isr_vector     0x0000000008000000       0x50
+ *(.isr_vector)
+ .isr_vector    0x0000000008000000       0x50 objects/startup.o
+                0x0000000008000000                vector_table
+
+.text           0x0000000008000050      0x324
+ *(.text*)
+ .text          0x0000000008000050       0x1c objects/sample1.o
+                0x0000000008000050                main
+ .text          0x000000000800006c       0x48 objects/sample2.o
+                0x000000000800006c                main1
+ .text          0x00000000080000b4      0x144 objects/startup.o
+                0x00000000080000b4                Reset_Handler
+                0x0000000008000150                Default_Handler
+                0x000000000800015c                NMI_Handler
+                0x0000000008000168                HardFault_Handler
+                0x0000000008000174                MemManage_Handler
+                0x0000000008000180                BusFault_Handler
+                0x000000000800018c                UsageFault_Handler
+                0x0000000008000198                SVC_Handler
+                0x00000000080001a4                DebugMon_Handler
+                0x00000000080001b0                PendSV_Handler
+                0x00000000080001bc                SysTick_Handler
+                0x00000000080001c8                EXTI0_Handler
+                0x00000000080001d4                TIM1_UP_Handler
+                0x00000000080001e0                USART1_Handler
+                0x00000000080001ec                I2C1_EV_Handler
+ .text          0x00000000080001f8      0x17c objects/syscalls.o
+                0x00000000080001f8                _exit
+                0x000000000800020c                _sbrk
+                0x0000000008000230                _write
+                0x000000000800025c                _close
+                0x0000000008000280                _fstat
+                0x00000000080002b4                _isatty
+                0x00000000080002d8                _lseek
+                0x0000000008000304                _read
+                0x0000000008000330                _getpid
+                0x000000000800034c                _kill
+ *(.rodata*)
+
+.glue_7         0x0000000008000374        0x0
+ .glue_7        0x0000000008000374        0x0 linker stubs
+
+.glue_7t        0x0000000008000374        0x0
+ .glue_7t       0x0000000008000374        0x0 linker stubs
+
+.vfp11_veneer   0x0000000008000374        0x0
+ .vfp11_veneer  0x0000000008000374        0x0 linker stubs
+
+.v4_bx          0x0000000008000374        0x0
+ .v4_bx         0x0000000008000374        0x0 linker stubs
+
+.iplt           0x0000000008000374        0x0
+ .iplt          0x0000000008000374        0x0 objects/sample1.o
+
+.rel.dyn        0x0000000008000374        0x0
+ .rel.iplt      0x0000000008000374        0x0 objects/sample1.o
+
+.data           0x0000000020000000       0x14 load address 0x0000000008000374
+                0x0000000020000000                _sdata = .
+ *(.data*)
+ .data          0x0000000020000000       0x14 objects/sample1.o
+ .data          0x0000000020000014        0x0 objects/sample2.o
+ .data          0x0000000020000014        0x0 objects/startup.o
+ .data          0x0000000020000014        0x0 objects/syscalls.o
+                0x0000000020000014                _edata = .
+
+.igot.plt       0x0000000020000014        0x0 load address 0x0000000008000388
+ .igot.plt      0x0000000020000014        0x0 objects/sample1.o
+
+.bss            0x0000000020000014    0x1d8f0 load address 0x0000000008000388
+                0x0000000020000014                _sbss = .
+ *(.bss*)
+ .bss           0x0000000020000014    0x1d8f0 objects/sample1.o
+                0x0000000020000014                SampleArray
+ .bss           0x000000002001d904        0x0 objects/sample2.o
+ .bss           0x000000002001d904        0x0 objects/startup.o
+ .bss           0x000000002001d904        0x0 objects/syscalls.o
+ *(COMMON)
+                0x000000002001d904                _ebss = .
+                0x0000000020020000                _estack = (ORIGIN (RAM) + LENGTH (RAM))
+                0x0000000000000400                __stack_size = 0x400
+                0x0000000008000374                _la_data = LOADADDR (.data)
+OUTPUT(Full_bin/program.elf elf32-littlearm)
+LOAD linker stubs
+
+.comment        0x0000000000000000       0x33
+ .comment       0x0000000000000000       0x33 objects/sample1.o
+                                         0x34 (size before relaxing)
+ .comment       0x0000000000000033       0x34 objects/sample2.o
+ .comment       0x0000000000000033       0x34 objects/startup.o
+ .comment       0x0000000000000033       0x34 objects/syscalls.o
+
+.ARM.attributes
+                0x0000000000000000       0x2a
+ .ARM.attributes
+                0x0000000000000000       0x2a objects/sample1.o
+ .ARM.attributes
+                0x000000000000002a       0x2a objects/sample2.o
+ .ARM.attributes
+                0x0000000000000054       0x2a objects/startup.o
+ .ARM.attributes
+                0x000000000000007e       0x2a objects/syscalls.o
