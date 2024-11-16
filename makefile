@@ -22,7 +22,6 @@ INCLUDE_DIR = include
 FULL_BIN_DIR = Full_bin
 
 # Target executable
-TARGET = $(FULL_BIN_DIR)/program
 TARGET_BINARY = $(FULL_BIN_DIR)/program.bin
 TARGET_HEX = $(FULL_BIN_DIR)/program.hex
 TARGET_ELF = $(FULL_BIN_DIR)/program.elf
@@ -68,13 +67,13 @@ SOURCE_FILES = $(wildcard $(SOURCE_DIR)/*.c)
 OBJ_FILES = $(patsubst $(SOURCE_DIR)/%.c, $(OBJECT_DIR)/%.o, $(SOURCE_FILES))
 
 # Default target
-all: create_dir $(TARGET) nm
+all: create_dir build nm
 	@$(ECHO) "$(GREEN)***********************************************$(RESET)"
 	@$(ECHO) "$(GREEN)*********** Build Successful ******************$(RESET)"
 	@$(ECHO) "$(GREEN)***********************************************$(RESET)"
 
 # Rule to link object files and create the executable
-$(TARGET): $(OBJ_FILES)
+build: $(OBJ_FILES)
     #Link object files to create an ELF file
 	$(ECHO) "$(CYAN)Generating $(TARGET_ELF) from the obj files$(RESET)"
 	@$(LD) -o $(TARGET_ELF) $(OBJ_FILES) $(LDFLAGS) 
