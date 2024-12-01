@@ -15,34 +15,36 @@ RM=rm -rf           # Use -rf to force removal of files/directories
 ECHO=@echo
 SREC=srec_cat
 
+#root directory
+ROOT = ..
 # Directories
-SOURCE_DIR = source
+SOURCE_DIR = $(ROOT)/source
 OBJECT_DIR = objects
 INCLUDE_DIRS = \
-	FreeRTOS/Source/include \
-	FreeRTOS/Source/portable/GCC/ARM_CM4F \
-	FreeRTOS/Source/portable/MemMang \
-	FreeRTOS/Source/examples/coverity \
-	include
+	$(ROOT)/FreeRTOS/Source/include \
+	$(ROOT)/FreeRTOS/Source/portable/GCC/ARM_CM4F \
+	$(ROOT)/FreeRTOS/Source/portable/MemMang \
+	$(ROOT)/FreeRTOS/Source/examples/coverity \
+	$(ROOT)/include
 
 INCLUDE_FLAGS = $(addprefix -I, $(INCLUDE_DIRS))
 FULL_BIN_DIR = Full_bin
 
 APP_SRC = \
-    source/main.c \
-    source/sample1.c \
-    source/sample2.c \
-    source/startup.c \
-    source/syscalls.c
+    $(ROOT)/source/main.c \
+    $(ROOT)/source/sample1.c \
+    $(ROOT)/source/sample2.c \
+    $(ROOT)/source/startup.c \
+    $(ROOT)/source/syscalls.c
 
 FREERTOS_SRC = \
-    FreeRTOS/Source/queue.c \
-    FreeRTOS/Source/list.c \
-	FreeRTOS/Source/tasks.c \
-    FreeRTOS/Source/timers.c \
-    FreeRTOS/Source/event_groups.c \
-    FreeRTOS/Source/portable/GCC/ARM_CM4F/port.c \
-    FreeRTOS/Source/portable/MemMang/heap_4.c
+    $(ROOT)/FreeRTOS/Source/queue.c \
+    $(ROOT)/FreeRTOS/Source/list.c \
+	$(ROOT)/FreeRTOS/Source/tasks.c \
+    $(ROOT)/FreeRTOS/Source/timers.c \
+    $(ROOT)/FreeRTOS/Source/event_groups.c \
+    $(ROOT)/FreeRTOS/Source/portable/GCC/ARM_CM4F/port.c \
+    $(ROOT)/FreeRTOS/Source/portable/MemMang/heap_4.c
 
 # Target executable
 TARGET_BINARY = $(FULL_BIN_DIR)/program.bin
@@ -92,14 +94,14 @@ SOURCE_FILES += $(FREERTOS_SRC)
 
 # Convert source files in source to object files in obj
 #$(patsubst pattern,replacement,text)
-OBJ_FILES = $(SOURCE_FILES:%.c=$(OBJECT_DIR)/%.o)
+OBJ_FILES = $(patsubst $(ROOT)/%, $(OBJECT_DIR)/%, $(SOURCE_FILES:%.c=%.o))
 
 # Default target
 all: create_dir build nm
 
 read_obj:
 	@$(ECHO) "$(INCLUDE_FLAGS)"
-	@$(ECHO) "$(INCLUDE_DIR)"
+	@$(ECHO) "$(OBJ_FILES)"
 #@$(ECHO) "$(SOURCE_FILES)"
 #@$(ECHO) "$(OBJ_FILES)"
 
@@ -131,16 +133,15 @@ generate_s19: $(TARGET_ELF)
 	@$(OBJCOPY) -O srec $(TARGET_ELF) $(TARGET_S19)
 
 # Rule to compile .c files to .o files
-$(OBJECT_DIR)/%.o: %.c
-    #$< refers to the prerequisite and $@ refers to the target 
-    #The notdir function removes the directory portion of a file path, leaving only the file name.
+$(OBJECT_DIR)/%.o: $(ROOT)/%.c
+	@$(MKDIR) $(dir $@)
 	$(ECHO) "$(YELLOW)Compiling $< into $(notdir $@)$(RESET)"
-	@if $(COMPILE_CALL) -c -o $@ $<; then\
+	if $(COMPILE_CALL) -c -o $@ $<; then\
 		echo "$(GREEN)Compilation successful!$(RESET)";\
 	else\
 		echo "$(RED)Compilation failed!$(RESET)";\
 	fi
-	@$(COMPILE_CALL) -MM $< > $(OBJECT_DIR)/$*.d
+#$(COMPILE_CALL) -MM $< > $(dir $@)$*.d
 
 #Clean up build artifacts
 clean:
@@ -151,7 +152,7 @@ clean:
 create_dir:
 	$(ECHO) "Creating directories: $(OBJECT_DIR) and $(FULL_BIN_DIR)"
 	$(MKDIR) $(OBJECT_DIR) $(FULL_BIN_DIR)
-	$(MKDIR) $(addprefix $(OBJECT_DIR)/, $(dir $(SOURCE_FILES)))
+	$(MKDIR) $(sort $(dir $(OBJ_FILES)))
 
 read_elf:
 #This displays detailed information about the ELF file
