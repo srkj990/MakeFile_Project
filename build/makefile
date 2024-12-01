@@ -135,13 +135,14 @@ generate_s19: $(TARGET_ELF)
 # Rule to compile .c files to .o files
 $(OBJECT_DIR)/%.o: $(ROOT)/%.c
 	@$(MKDIR) $(dir $@)
-	$(ECHO) "$(YELLOW)Compiling $< into $(notdir $@)$(RESET)"
-	if $(COMPILE_CALL) -c -o $@ $<; then\
+	@$(ECHO) "$(YELLOW)Compiling $< into $(notdir $@)$(RESET)"
+	@if $(COMPILE_CALL) -c -o $@ $<; then\
 		echo "$(GREEN)Compilation successful!$(RESET)";\
 	else\
 		echo "$(RED)Compilation failed!$(RESET)";\
 	fi
-#$(COMPILE_CALL) -MM $< > $(dir $@)$*.d
+#Rule to create the .d files for dependency tracking from the obj files
+	@$(COMPILE_CALL) -MM $< > $(subst .o,.d,$@)
 
 #Clean up build artifacts
 clean:
