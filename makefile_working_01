@@ -1,0 +1,71 @@
+# Define short forms for commonly used commands
+MKDIR=mkdir      # Use -p to create parent directories as needed
+RM=rm -rf           # Use -rf to force removal of files/directories
+ECHO=@echo
+
+# Directories
+SOURCE_DIR = source
+OBJECT_DIR = objects
+INCLUDE_DIR = include
+FULL_BIN_DIR = Full_bin
+
+# Target executable
+TARGET = $(FULL_BIN_DIR)/program
+
+# Compiler and flags
+CC = gcc
+CFLAGS = -Wall 
+C_FLAGS_EXTRA = -I $(INCLUDE_DIR)
+COMPILE_CALL = $(CC) $(CFLAGS) $(C_FLAGS_EXTRA)
+
+C_FLAGS_EXTRA1 = 0 # make all C_FLAGS_EXTRA1=0 or make all C_FLAGS_EXTRA1 = some other value.
+DEBUG ?= 0 #
+
+ifeq ($(C_FLAGS_EXTRA1),1)
+	CFLAGS += -Wextra
+else
+	CFLAGS +=  -Wpedantic
+endif
+
+ifeq ($(DEBUG),1)
+	CFLAGS += -Wconversion
+else
+	CFLAGS +=  -Wswitch-enum
+endif
+
+
+# Find all .c files in the source directory
+# $(wildcard pattern)
+SOURCE_FILES = $(wildcard $(SOURCE_DIR)/*.c)
+# Convert source files in source to object files in obj
+#$(patsubst pattern,replacement,text)
+OBJ_FILES = $(patsubst $(SOURCE_DIR)/%.c, $(OBJECT_DIR)/%.o, $(SOURCE_FILES))
+
+# Default target
+all: create_dir $(TARGET)
+
+# Rule to link object files and create the executable
+$(TARGET): $(OBJ_FILES)
+	$(ECHO) "Linking object files to create executable: $@"
+	$(COMPILE_CALL) -o $@ $^
+
+# Rule to compile .c files to .o files
+$(OBJECT_DIR)/%.o: $(SOURCE_DIR)/%.c
+    #$< refers to the prerequisite and $@ refers to the target 
+	$(ECHO) "Compiling $< into $@"
+	$(COMPILE_CALL) -c -o $@ $<
+	$(COMPILE_CALL) -MM $< > $(OBJECT_DIR)/$*.d
+
+# Clean up build artifacts
+clean:
+	$(ECHO) "Cleaning up generated files..."
+	$(RM) $(OBJECT_DIR) $(FULL_BIN_DIR)
+
+# Target to create necessary directories
+create_dir:
+	$(ECHO) "Creating directories: gcc -v"
+	$(ECHO) "Creating directories: $(OBJECT_DIR) and $(FULL_BIN_DIR)"
+	$(MKDIR) $(OBJECT_DIR) $(FULL_BIN_DIR)
+
+# Phony targets
+.PHONY: all clean

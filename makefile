@@ -18,14 +18,38 @@ SREC=srec_cat
 # Directories
 SOURCE_DIR = source
 OBJECT_DIR = objects
-INCLUDE_DIR = include
+INCLUDE_DIRS = \
+	FreeRTOS/Source/include \
+	FreeRTOS/Source/portable/GCC/ARM_CM4F \
+	FreeRTOS/Source/portable/MemMang \
+	FreeRTOS/Source/examples/coverity \
+	include
+
+INCLUDE_FLAGS = $(addprefix -I, $(INCLUDE_DIRS))
 FULL_BIN_DIR = Full_bin
+
+APP_SRC = \
+    source/main.c \
+    source/sample1.c \
+    source/sample2.c \
+    source/startup.c \
+    source/syscalls.c
+
+FREERTOS_SRC = \
+    FreeRTOS/Source/queue.c \
+    FreeRTOS/Source/list.c \
+	FreeRTOS/Source/tasks.c \
+    FreeRTOS/Source/timers.c \
+    FreeRTOS/Source/event_groups.c \
+    FreeRTOS/Source/portable/GCC/ARM_CM4F/port.c \
+    FreeRTOS/Source/portable/MemMang/heap_4.c
 
 # Target executable
 TARGET_BINARY = $(FULL_BIN_DIR)/program.bin
 TARGET_HEX = $(FULL_BIN_DIR)/program.hex
 TARGET_ELF = $(FULL_BIN_DIR)/program.elf
 TARGET_MAP = $(FULL_BIN_DIR)/program.map
+TARGET_S19 = $(FULL_BIN_DIR)/program.s19
 
 # Compiler and flags
 #CC = gcc
@@ -37,58 +61,80 @@ READ_ELF = arm-none-eabi-readelf
 OBJDUMP = arm-none-eabi-objdump
 
 LDFLAGS = -T linker_script.ld -Map=$(TARGET_MAP)
+LDFLAGS += #-nostartfiles -nodefaultlibs -Wl,--gc-sections -Wl,
 #CFLAGS = -Wall -Werror
-CFLAGS = -mcpu=cortex-m4 -mthumb -O2 -Wall -specs=nosys.specs
-C_FLAGS_EXTRA = -I $(INCLUDE_DIR)
+CFLAGS = -mcpu=cortex-m4 -mthumb -O2 -mfpu=fpv4-sp-d16 -mfloat-abi=hard -specs=nosys.specs
+CFLAGS += $(INCLUDE_FLAGS) 
+
 #COMPILE_CALL = $(CC) $(CFLAGS) $(C_FLAGS_EXTRA)
-COMPILE_CALL = $(CC) #$(CFLAGS)
+COMPILE_CALL = $(CC) $(CFLAGS)
 
 C_FLAGS_EXTRA1 = 0 # make all C_FLAGS_EXTRA1=0 or make all C_FLAGS_EXTRA1 = some other value.
 C_FLAGS_EXTRA2 = 0 #
 
 ifeq ($(C_FLAGS_EXTRA1),1)
-	CFLAGS += -Wextra
+	CFLAGS += -Wextra -Wpedantic
 else
-	CFLAGS +=  -Wpedantic
+	CFLAGS += 
 endif
 
 ifeq ($(C_FLAGS_EXTRA2),1)
-	CFLAGS += -Wconversion
+	CFLAGS += -Wconversion -Wswitch-enum
 else
-	CFLAGS +=  -Wswitch-enum
+	CFLAGS +=  
 endif
 
 
 # Find all .c files in the source directory
 # $(wildcard pattern)
-SOURCE_FILES = $(wildcard $(SOURCE_DIR)/*.c)
+SOURCE_FILES += $(APP_SRC)
+SOURCE_FILES += $(FREERTOS_SRC)
+
 # Convert source files in source to object files in obj
 #$(patsubst pattern,replacement,text)
-OBJ_FILES = $(patsubst $(SOURCE_DIR)/%.c, $(OBJECT_DIR)/%.o, $(SOURCE_FILES))
+OBJ_FILES = $(SOURCE_FILES:%.c=$(OBJECT_DIR)/%.o)
 
 # Default target
 all: create_dir build nm
+
+read_obj:
+	@$(ECHO) "$(INCLUDE_FLAGS)"
+	@$(ECHO) "$(INCLUDE_DIR)"
+#@$(ECHO) "$(SOURCE_FILES)"
+#@$(ECHO) "$(OBJ_FILES)"
+
+# Rule to link object files and create the executable
+build: generate_elf generate_bin generate_hex generate_s19
 	@$(ECHO) "$(GREEN)***********************************************$(RESET)"
 	@$(ECHO) "$(GREEN)*********** Build Successful ******************$(RESET)"
 	@$(ECHO) "$(GREEN)***********************************************$(RESET)"
+	 
 
-# Rule to link object files and create the executable
-build: $(OBJ_FILES)
+generate_elf: $(OBJ_FILES)
     #Link object files to create an ELF file
 	$(ECHO) "$(CYAN)Generating $(TARGET_ELF) from the obj files$(RESET)"
 	@$(LD) -o $(TARGET_ELF) $(OBJ_FILES) $(LDFLAGS) 
 
+generate_bin: $(TARGET_ELF)
     #Generate a binary file
 	$(ECHO) "$(CYAN)Generating $(TARGET_BINARY) File from the $(TARGET_ELF)$(RESET)"
 	@$(OBJCOPY) -O binary $(TARGET_ELF) $(TARGET_BINARY)
 
+generate_hex: $(TARGET_ELF)
     #Generate a hex file
 	$(ECHO) "$(CYAN)Generating $(TARGET_HEX) File from the $(TARGET_ELF)$(RESET)"
 	@$(OBJCOPY) -O ihex $(TARGET_ELF) $(TARGET_HEX)
 
+generate_s19: $(TARGET_ELF)
+    #Generate a hex file
+	$(ECHO) "$(CYAN)Generating $(TARGET_S19) File from the $(TARGET_ELF)$(RESET)"
+	@$(OBJCOPY) -O srec $(TARGET_ELF) $(TARGET_S19)
+
 # Rule to compile .c files to .o files
-$(OBJECT_DIR)/%.o: $(SOURCE_DIR)/%.c
-	$(ECHO) "$(YELLOW)Compiling $< into $@$(RESET)"
+$(OBJECT_DIR)/%.o: %.c
+    #$< refers to the prerequisite and $@ refers to the target 
+    #The notdir function removes the directory portion of a file path, leaving only the file name.
+	$(ECHO) "$(YELLOW)Compiling $< into $(notdir $@)$(RESET)"
 	@if $(COMPILE_CALL) -c -o $@ $<; then\
 		echo "$(GREEN)Compilation successful!$(RESET)";\
 	else\
@@ -105,6 +151,7 @@ clean:
 create_dir:
 	$(ECHO) "Creating directories: $(OBJECT_DIR) and $(FULL_BIN_DIR)"
 	$(MKDIR) $(OBJECT_DIR) $(FULL_BIN_DIR)
+	$(MKDIR) $(addprefix $(OBJECT_DIR)/, $(dir $(SOURCE_FILES)))
 
 read_elf:
 #This displays detailed information about the ELF file

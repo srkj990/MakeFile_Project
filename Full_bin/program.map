@@ -4,115 +4,346 @@ Memory Configuration
 Name             Origin             Length             Attributes
 FLASH            0x0000000008000000 0x0000000000080000 xr
 RAM              0x0000000020000000 0x0000000000020000 rw
+ITCM             0x0000000000000000 0x0000000000010000 xr
+DTCM             0x0000000020010000 0x0000000000010000 rw
+SRAM             0x0000000020020000 0x0000000000020000 rw
 *default*        0x0000000000000000 0xffffffffffffffff
 
 Linker script and memory map
 
-LOAD objects/sample1.o
-LOAD objects/sample2.o
-LOAD objects/startup.o
-LOAD objects/syscalls.o
+LOAD objects/source/main.o
+LOAD objects/source/sample1.o
+LOAD objects/source/sample2.o
+LOAD objects/source/startup.o
+LOAD objects/source/syscalls.o
+LOAD objects/FreeRTOS/Source/queue.o
+LOAD objects/FreeRTOS/Source/list.o
+LOAD objects/FreeRTOS/Source/tasks.o
+LOAD objects/FreeRTOS/Source/timers.o
+LOAD objects/FreeRTOS/Source/event_groups.o
+LOAD objects/FreeRTOS/Source/portable/GCC/ARM_CM4F/port.o
+LOAD objects/FreeRTOS/Source/portable/MemMang/heap_4.o
 
 .isr_vector     0x0000000008000000       0x50
  *(.isr_vector)
- .isr_vector    0x0000000008000000       0x50 objects/startup.o
+ .isr_vector    0x0000000008000000       0x50 objects/source/startup.o
                 0x0000000008000000                vector_table
 
-.text           0x0000000008000050      0x324
+.text           0x0000000008000050     0x3bc0
  *(.text*)
- .text          0x0000000008000050       0x1c objects/sample1.o
-                0x0000000008000050                main
- .text          0x000000000800006c       0x48 objects/sample2.o
-                0x000000000800006c                main1
- .text          0x00000000080000b4      0x144 objects/startup.o
-                0x00000000080000b4                Reset_Handler
+ .text          0x0000000008000050       0x10 objects/source/main.o
+                0x0000000008000050                vTask1
+                0x0000000008000058                vTask2
+ .text.startup  0x0000000008000060       0x40 objects/source/main.o
+                0x0000000008000060                main
+ .text          0x00000000080000a0        0x4 objects/source/sample1.o
+                0x00000000080000a0                Sub_main2
+ .text          0x00000000080000a4        0x4 objects/source/sample2.o
+                0x00000000080000a4                Sub_main1
+ .text          0x00000000080000a8       0xac objects/source/startup.o
+                0x00000000080000a8                NMI_Handler
+                0x00000000080000ac                HardFault_Handler
+                0x00000000080000b0                MemManage_Handler
+                0x00000000080000b4                BusFault_Handler
+                0x00000000080000b8                UsageFault_Handler
+                0x00000000080000bc                SVC_Handler
+                0x00000000080000c0                DebugMon_Handler
+                0x00000000080000c4                PendSV_Handler
+                0x00000000080000c8                SysTick_Handler
+                0x00000000080000cc                EXTI0_Handler
+                0x00000000080000d0                TIM1_UP_Handler
+                0x00000000080000d4                USART1_Handler
+                0x00000000080000d8                I2C1_EV_Handler
+                0x00000000080000dc                Reset_Handler
+                0x0000000008000128                memcpy
+                0x0000000008000140                memset
                 0x0000000008000150                Default_Handler
-                0x000000000800015c                NMI_Handler
-                0x0000000008000168                HardFault_Handler
-                0x0000000008000174                MemManage_Handler
-                0x0000000008000180                BusFault_Handler
-                0x000000000800018c                UsageFault_Handler
-                0x0000000008000198                SVC_Handler
-                0x00000000080001a4                DebugMon_Handler
-                0x00000000080001b0                PendSV_Handler
-                0x00000000080001bc                SysTick_Handler
-                0x00000000080001c8                EXTI0_Handler
-                0x00000000080001d4                TIM1_UP_Handler
-                0x00000000080001e0                USART1_Handler
-                0x00000000080001ec                I2C1_EV_Handler
- .text          0x00000000080001f8      0x17c objects/syscalls.o
-                0x00000000080001f8                _exit
-                0x000000000800020c                _sbrk
-                0x0000000008000230                _write
-                0x000000000800025c                _close
-                0x0000000008000280                _fstat
-                0x00000000080002b4                _isatty
-                0x00000000080002d8                _lseek
-                0x0000000008000304                _read
-                0x0000000008000330                _getpid
-                0x000000000800034c                _kill
+ .text          0x0000000008000154       0x3c objects/source/syscalls.o
+                0x0000000008000154                _exit
+                0x0000000008000158                _sbrk
+                0x0000000008000160                _write
+                0x0000000008000164                _close
+                0x000000000800016c                _fstat
+                0x0000000008000178                _isatty
+                0x000000000800017c                _lseek
+                0x0000000008000180                _read
+                0x0000000008000184                _getpid
+                0x0000000008000188                _kill
+ .text          0x0000000008000190      0xd6c objects/FreeRTOS/Source/queue.o
+                0x00000000080002fc                xQueueGenericReset
+                0x0000000008000380                xQueueGenericCreateStatic
+                0x0000000008000404                xQueueGenericGetStaticBuffers
+                0x000000000800041c                xQueueGenericCreate
+                0x0000000008000468                xQueueCreateCountingSemaphoreStatic
+                0x00000000080004d0                xQueueCreateCountingSemaphore
+                0x0000000008000508                xQueueGenericSend
+                0x0000000008000650                xQueueCreateMutexStatic
+                0x00000000080006bc                xQueueGiveMutexRecursive
+                0x00000000080006f0                xQueueCreateMutex
+                0x000000000800072c                xQueueGenericSendFromISR
+                0x00000000080007c8                xQueueGiveFromISR
+                0x000000000800083c                xQueueReceive
+                0x0000000008000970                xQueueSemaphoreTake
+                0x0000000008000ad8                xQueueTakeMutexRecursive
+                0x0000000008000b08                xQueuePeek
+                0x0000000008000c34                xQueueReceiveFromISR
+                0x0000000008000cc4                xQueuePeekFromISR
+                0x0000000008000d0c                uxQueueMessagesWaiting
+                0x0000000008000d24                uxQueueSpacesAvailable
+                0x0000000008000d40                uxQueueMessagesWaitingFromISR
+                0x0000000008000d44                vQueueDelete
+                0x0000000008000d50                uxQueueGetQueueItemSize
+                0x0000000008000d54                uxQueueGetQueueLength
+                0x0000000008000d58                xQueueIsQueueEmptyFromISR
+                0x0000000008000d64                xQueueIsQueueFullFromISR
+                0x0000000008000d74                vQueueWaitForMessageRestricted
+                0x0000000008000dd0                xQueueCreateSet
+                0x0000000008000e18                xQueueAddToSet
+                0x0000000008000e44                xQueueRemoveFromSet
+                0x0000000008000e70                xQueueSelectFromSet
+                0x0000000008000e84                xQueueSelectFromSetFromISR
+ .text          0x0000000008000efc       0xb0 objects/FreeRTOS/Source/list.o
+                0x0000000008000efc                vListInitialise
+                0x0000000008000f1c                vListInitialiseItem
+                0x0000000008000f24                vListInsertEnd
+                0x0000000008000f44                vListInsert
+                0x0000000008000f84                uxListRemove
+ .text          0x0000000008000fac     0x1d64 objects/FreeRTOS/Source/tasks.o
+                0x0000000008001470                xTaskCreateStatic
+                0x00000000080014d0                xTaskCreate
+                0x000000000800153c                vTaskDelete
+                0x0000000008001618                eTaskGetState
+                0x000000000800162c                uxTaskPriorityGet
+                0x0000000008001650                uxTaskPriorityGetFromISR
+                0x0000000008001680                uxTaskBasePriorityGet
+                0x00000000080016a4                uxTaskBasePriorityGetFromISR
+                0x00000000080016d4                vTaskPrioritySet
+                0x00000000080017ac                vTaskResume
+                0x000000000800184c                xTaskResumeFromISR
+                0x0000000008001918                vTaskStartScheduler
+                0x00000000080019c0                vTaskEndScheduler
+                0x00000000080019fc                vTaskSuspendAll
+                0x0000000008001a10                xTaskResumeAll
+                0x0000000008001b94                xTaskDelayUntil
+                0x0000000008001c24                vTaskDelay
+                0x0000000008001d04                xTaskGetTickCount
+                0x0000000008001d28                xTaskGetTickCountFromISR
+                0x0000000008001d4c                uxTaskGetNumberOfTasks
+                0x0000000008001d58                pcTaskGetName
+                0x0000000008001d6c                xTaskGetHandle
+                0x0000000008001e08                xTaskGetStaticBuffers
+                0x0000000008001e3c                xTaskGetIdleTaskHandle
+                0x0000000008001e48                xTaskGetIdleTaskHandleForCore
+                0x0000000008001e58                vTaskStepTick
+                0x0000000008001eb4                xTaskCatchUpTicks
+                0x0000000008001ee8                xTaskAbortDelay
+                0x0000000008001f88                xTaskIncrementTick
+                0x0000000008001fb0                vTaskSetApplicationTaskTag
+                0x0000000008001fdc                xTaskGetApplicationTaskTag
+                0x0000000008002000                xTaskGetApplicationTaskTagFromISR
+                0x0000000008002028                xTaskCallApplicationTaskHook
+                0x0000000008002044                vTaskSwitchContext
+                0x00000000080020b0                vTaskSuspend
+                0x0000000008002168                vTaskPlaceOnEventList
+                0x000000000800218c                vTaskPlaceOnUnorderedEventList
+                0x00000000080021d0                vTaskPlaceOnEventListRestricted
+                0x0000000008002220                xTaskRemoveFromEventList
+                0x0000000008002308                vTaskRemoveFromUnorderedEventList
+                0x00000000080023c8                vTaskSetTimeOutState
+                0x00000000080023ec                vTaskInternalSetTimeOutState
+                0x0000000008002404                xTaskCheckForTimeOut
+                0x00000000080024a8                vTaskMissedYield
+                0x00000000080024b8                eTaskConfirmSleepModeStatus
+                0x00000000080024f0                uxTaskGetStackHighWaterMark
+                0x0000000008002520                xTaskGetCurrentTaskHandle
+                0x000000000800252c                xTaskGetCurrentTaskHandleForCore
+                0x000000000800253c                xTaskGetSchedulerState
+                0x000000000800255c                xTaskPriorityInherit
+                0x00000000080025f0                xTaskPriorityDisinherit
+                0x0000000008002664                vTaskPriorityDisinheritAfterTimeout
+                0x00000000080026e4                uxTaskResetEventItemValue
+                0x000000000800270c                pvTaskIncrementMutexHeldCount
+                0x0000000008002720                ulTaskGenericNotifyTake
+                0x00000000080027d4                xTaskGenericNotifyWait
+                0x00000000080028b8                xTaskGenericNotify
+                0x00000000080029d4                xTaskGenericNotifyFromISR
+                0x0000000008002b20                vTaskGenericNotifyGiveFromISR
+                0x0000000008002c28                xTaskGenericNotifyStateClear
+                0x0000000008002c60                ulTaskGenericNotifyValueClear
+                0x0000000008002c94                vApplicationGetIdleTaskMemory
+                0x0000000008002cb4                vApplicationGetTimerTaskMemory
+                0x0000000008002cd4                vTaskResetState
+ .text          0x0000000008002d10      0x624 objects/FreeRTOS/Source/timers.o
+                0x0000000008003094                xTimerCreateTimerTask
+                0x00000000080030e4                xTimerCreate
+                0x000000000800312c                xTimerCreateStatic
+                0x000000000800316c                xTimerGenericCommandFromTask
+                0x00000000080031ac                xTimerGenericCommandFromISR
+                0x00000000080031dc                xTimerGetTimerDaemonTaskHandle
+                0x00000000080031e8                xTimerGetPeriod
+                0x00000000080031f0                vTimerSetReloadMode
+                0x0000000008003220                xTimerGetReloadMode
+                0x0000000008003240                uxTimerGetReloadMode
+                0x0000000008003260                xTimerGetExpiryTime
+                0x0000000008003268                xTimerGetStaticBuffer
+                0x000000000800327c                pcTimerGetName
+                0x0000000008003280                xTimerIsTimerActive
+                0x00000000080032a0                pvTimerGetTimerID
+                0x00000000080032b8                vTimerSetTimerID
+                0x00000000080032cc                xTimerPendFunctionCallFromISR
+                0x00000000080032f4                xTimerPendFunctionCall
+                0x0000000008003324                vTimerResetState
+ .text          0x0000000008003334      0x360 objects/FreeRTOS/Source/event_groups.o
+                0x0000000008003334                xEventGroupCreateStatic
+                0x0000000008003350                xEventGroupCreate
+                0x0000000008003374                xEventGroupWaitBits
+                0x0000000008003468                xEventGroupClearBits
+                0x0000000008003494                xEventGroupGetBitsFromISR
+                0x00000000080034b4                xEventGroupSetBits
+                0x0000000008003548                xEventGroupSync
+                0x000000000800362c                vEventGroupDelete
+                0x0000000008003660                xEventGroupGetStaticBuffer
+                0x0000000008003670                vEventGroupSetBitsCallback
+                0x0000000008003678                vEventGroupClearBitsCallback
+ .text          0x0000000008003694      0x30c objects/FreeRTOS/Source/portable/GCC/ARM_CM4F/port.o
+                0x00000000080036f0                pxPortInitialiseStack
+                0x0000000008003718                vPortSVCHandler
+                0x0000000008003738                vPortEndScheduler
+                0x000000000800373c                vPortEnterCritical
+                0x000000000800375c                vPortExitCritical
+                0x0000000008003770                xPortPendSVHandler
+                0x00000000080037d0                xPortSysTickHandler
+                0x00000000080037fc                vPortSuppressTicksAndSleep
+                0x0000000008003904                vPortSetupTimerInterrupt
+                0x0000000008003938                xPortStartScheduler
+ .text          0x00000000080039a0      0x258 objects/FreeRTOS/Source/portable/MemMang/heap_4.o
+                0x00000000080039a0                pvPortMalloc
+                0x0000000008003a98                vPortFree
+                0x0000000008003b20                xPortGetFreeHeapSize
+                0x0000000008003b2c                xPortGetMinimumEverFreeHeapSize
+                0x0000000008003b38                xPortResetHeapMinimumEverFreeHeapSize
+                0x0000000008003b44                vPortInitialiseBlocks
+                0x0000000008003b48                pvPortCalloc
+                0x0000000008003b70                vPortGetHeapStats
+                0x0000000008003be4                vPortHeapResetState
  *(.rodata*)
+ .rodata.str1.4
+                0x0000000008003bf8        0xe objects/source/main.o
+ *fill*         0x0000000008003c06        0x2 
+ .rodata.str1.4
+                0x0000000008003c08        0x8 objects/FreeRTOS/Source/timers.o
 
-.glue_7         0x0000000008000374        0x0
- .glue_7        0x0000000008000374        0x0 linker stubs
+.glue_7         0x0000000008003c10        0x0
+ .glue_7        0x0000000008003c10        0x0 linker stubs
 
-.glue_7t        0x0000000008000374        0x0
- .glue_7t       0x0000000008000374        0x0 linker stubs
+.glue_7t        0x0000000008003c10        0x0
+ .glue_7t       0x0000000008003c10        0x0 linker stubs
 
-.vfp11_veneer   0x0000000008000374        0x0
- .vfp11_veneer  0x0000000008000374        0x0 linker stubs
+.vfp11_veneer   0x0000000008003c10        0x0
+ .vfp11_veneer  0x0000000008003c10        0x0 linker stubs
 
-.v4_bx          0x0000000008000374        0x0
- .v4_bx         0x0000000008000374        0x0 linker stubs
+.v4_bx          0x0000000008003c10        0x0
+ .v4_bx         0x0000000008003c10        0x0 linker stubs
 
-.iplt           0x0000000008000374        0x0
- .iplt          0x0000000008000374        0x0 objects/sample1.o
+.iplt           0x0000000008003c10        0x0
+ .iplt          0x0000000008003c10        0x0 objects/source/main.o
 
-.rel.dyn        0x0000000008000374        0x0
- .rel.iplt      0x0000000008000374        0x0 objects/sample1.o
+.rel.dyn        0x0000000008003c10        0x0
+ .rel.iplt      0x0000000008003c10        0x0 objects/source/main.o
 
-.data           0x0000000020000000       0x14 load address 0x0000000008000374
+.data           0x0000000020000000        0x8 load address 0x0000000008003c10
                 0x0000000020000000                _sdata = .
  *(.data*)
- .data          0x0000000020000000       0x14 objects/sample1.o
- .data          0x0000000020000014        0x0 objects/sample2.o
- .data          0x0000000020000014        0x0 objects/startup.o
- .data          0x0000000020000014        0x0 objects/syscalls.o
-                0x0000000020000014                _edata = .
+ .data          0x0000000020000000        0x0 objects/source/main.o
+ .data          0x0000000020000000        0x0 objects/source/sample1.o
+ .data          0x0000000020000000        0x0 objects/source/sample2.o
+ .data          0x0000000020000000        0x0 objects/source/startup.o
+ .data          0x0000000020000000        0x0 objects/source/syscalls.o
+ .data          0x0000000020000000        0x0 objects/FreeRTOS/Source/queue.o
+ .data          0x0000000020000000        0x0 objects/FreeRTOS/Source/list.o
+ .data          0x0000000020000000        0x4 objects/FreeRTOS/Source/tasks.o
+ .data          0x0000000020000004        0x0 objects/FreeRTOS/Source/timers.o
+ .data          0x0000000020000004        0x0 objects/FreeRTOS/Source/event_groups.o
+ .data          0x0000000020000004        0x4 objects/FreeRTOS/Source/portable/GCC/ARM_CM4F/port.o
+ .data          0x0000000020000008        0x0 objects/FreeRTOS/Source/portable/MemMang/heap_4.o
+                0x0000000020000008                _edata = .
 
-.igot.plt       0x0000000020000014        0x0 load address 0x0000000008000388
- .igot.plt      0x0000000020000014        0x0 objects/sample1.o
+.igot.plt       0x0000000020000008        0x0 load address 0x0000000008003c18
+ .igot.plt      0x0000000020000008        0x0 objects/source/main.o
 
-.bss            0x0000000020000014    0x1d8f0 load address 0x0000000008000388
-                0x0000000020000014                _sbss = .
+.bss            0x0000000020000008    0x1f10c load address 0x0000000008003c18
+                0x0000000020000008                _sbss = .
  *(.bss*)
- .bss           0x0000000020000014    0x1d8f0 objects/sample1.o
-                0x0000000020000014                SampleArray
- .bss           0x000000002001d904        0x0 objects/sample2.o
- .bss           0x000000002001d904        0x0 objects/startup.o
- .bss           0x000000002001d904        0x0 objects/syscalls.o
+ .bss           0x0000000020000008     0x1000 objects/source/main.o
+                0x0000000020000008                ucHeap
+ .bss           0x0000000020001008    0x1d8f0 objects/source/sample1.o
+                0x0000000020001008                SampleArray
+ .bss           0x000000002001e8f8        0x0 objects/source/sample2.o
+ .bss           0x000000002001e8f8        0x0 objects/source/startup.o
+ .bss           0x000000002001e8f8        0x0 objects/source/syscalls.o
+ .bss           0x000000002001e8f8        0x0 objects/FreeRTOS/Source/queue.o
+ .bss           0x000000002001e8f8        0x0 objects/FreeRTOS/Source/list.o
+ .bss           0x000000002001e8f8      0x640 objects/FreeRTOS/Source/tasks.o
+                0x000000002001e8fc                pxCurrentTCB
+ .bss           0x000000002001ef38      0x1b4 objects/FreeRTOS/Source/timers.o
+ .bss           0x000000002001f0ec        0x0 objects/FreeRTOS/Source/event_groups.o
+ .bss           0x000000002001f0ec        0xc objects/FreeRTOS/Source/portable/GCC/ARM_CM4F/port.o
+ .bss           0x000000002001f0f8       0x1c objects/FreeRTOS/Source/portable/MemMang/heap_4.o
  *(COMMON)
-                0x000000002001d904                _ebss = .
+                0x000000002001f114                _ebss = .
+
+.my_section     0x0000000000000000      0x190
+                0x0000000000000000                _start_my_section = .
+ *(.my_section*)
+ .my_section    0x0000000000000000      0x190 objects/source/sample1.o
+                0x0000000000000000                custom_section_Array
+                0x0000000000000190                _end_my_section = .
+                0x0000000000001000                __heap_size__ = 0x1000
+                0x0000000020001000                _end_of_heap = (_sdata + __heap_size__)
                 0x0000000020020000                _estack = (ORIGIN (RAM) + LENGTH (RAM))
-                0x0000000000000400                __stack_size = 0x400
-                0x0000000008000374                _la_data = LOADADDR (.data)
+                0x0000000000000800                __stack_size = 0x800
+                0x0000000008003c10                _la_data = LOADADDR (.data)
 OUTPUT(Full_bin/program.elf elf32-littlearm)
 LOAD linker stubs
 
 .comment        0x0000000000000000       0x33
- .comment       0x0000000000000000       0x33 objects/sample1.o
+ .comment       0x0000000000000000       0x33 objects/source/main.o
                                          0x34 (size before relaxing)
- .comment       0x0000000000000033       0x34 objects/sample2.o
- .comment       0x0000000000000033       0x34 objects/startup.o
- .comment       0x0000000000000033       0x34 objects/syscalls.o
+ .comment       0x0000000000000033       0x34 objects/source/sample1.o
+ .comment       0x0000000000000033       0x34 objects/source/sample2.o
+ .comment       0x0000000000000033       0x34 objects/source/startup.o
+ .comment       0x0000000000000033       0x34 objects/source/syscalls.o
+ .comment       0x0000000000000033       0x34 objects/FreeRTOS/Source/queue.o
+ .comment       0x0000000000000033       0x34 objects/FreeRTOS/Source/list.o
+ .comment       0x0000000000000033       0x34 objects/FreeRTOS/Source/tasks.o
+ .comment       0x0000000000000033       0x34 objects/FreeRTOS/Source/timers.o
+ .comment       0x0000000000000033       0x34 objects/FreeRTOS/Source/event_groups.o
+ .comment       0x0000000000000033       0x34 objects/FreeRTOS/Source/portable/GCC/ARM_CM4F/port.o
+ .comment       0x0000000000000033       0x34 objects/FreeRTOS/Source/portable/MemMang/heap_4.o
 
 .ARM.attributes
-                0x0000000000000000       0x2a
+                0x0000000000000000       0x34
  .ARM.attributes
-                0x0000000000000000       0x2a objects/sample1.o
+                0x0000000000000000       0x34 objects/source/main.o
  .ARM.attributes
-                0x000000000000002a       0x2a objects/sample2.o
+                0x0000000000000034       0x34 objects/source/sample1.o
  .ARM.attributes
-                0x0000000000000054       0x2a objects/startup.o
+                0x0000000000000068       0x34 objects/source/sample2.o
  .ARM.attributes
-                0x000000000000007e       0x2a objects/syscalls.o
+                0x000000000000009c       0x34 objects/source/startup.o
+ .ARM.attributes
+                0x00000000000000d0       0x34 objects/source/syscalls.o
+ .ARM.attributes
+                0x0000000000000104       0x34 objects/FreeRTOS/Source/queue.o
+ .ARM.attributes
+                0x0000000000000138       0x34 objects/FreeRTOS/Source/list.o
+ .ARM.attributes
+                0x000000000000016c       0x34 objects/FreeRTOS/Source/tasks.o
+ .ARM.attributes
+                0x00000000000001a0       0x34 objects/FreeRTOS/Source/timers.o
+ .ARM.attributes
+                0x00000000000001d4       0x34 objects/FreeRTOS/Source/event_groups.o
+ .ARM.attributes
+                0x0000000000000208       0x34 objects/FreeRTOS/Source/portable/GCC/ARM_CM4F/port.o
+ .ARM.attributes
+                0x000000000000023c       0x34 objects/FreeRTOS/Source/portable/MemMang/heap_4.o

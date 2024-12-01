@@ -1,4 +1,5 @@
 #include <stdint.h>
+#include <string.h>
 #include "../include/sample1.h"
 // Forward declaration of the default handlers
 void Reset_Handler(void);
@@ -16,7 +17,26 @@ void EXTI0_Handler(void);
 void TIM1_UP_Handler(void);
 void USART1_Handler(void);
 void I2C1_EV_Handler(void);
-
+void *memcpy(void *dest, const void *src, size_t n);
+void *memcpy(void *dest, const void *src, size_t n) 
+{
+    unsigned char *d = dest;
+    const unsigned char *s = src;
+    while (n--) {
+        *d++ = *s++;
+    }
+    return dest;
+}
+void *memset(void *s, int c, size_t n); 
+void *memset(void *s, int c, size_t n) 
+{
+    unsigned char *ptr = s;  // Cast the void pointer to a char pointer
+    while (n--) {
+        *ptr = (unsigned char)c;  // Set each byte of the memory block
+        ptr++;  // Move to the next byte
+    }
+    return s;  // Return the original pointer
+}
 // External symbols from the linker script
 extern unsigned long _estack;    // Top of the stack
 extern unsigned long _sdata;     // Start of initialized data

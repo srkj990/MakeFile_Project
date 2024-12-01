@@ -1,13 +1,13 @@
 #include "../include/sample2.h"
-int main1()
+int Sub_main1()
 {
    char name[50];
-   int marks, i, num;
+   int marks, i=0, num=10;
    //printf("Enter number of students: ");
    //scanf("%d", &num);
    for(i = 0; i < num; ++i)
    {
-      //printf("For student%d\nEnter name: ", i+1);
+      //printf("Hello world");
       //scanf("%s", name);
       //printf("Enter marks: ");
       //scanf("%d", &marks);
