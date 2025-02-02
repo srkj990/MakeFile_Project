@@ -10,7 +10,6 @@ PUBLIC_KEY_DER="./SecureBin/public_key.der"
 BINARY_HASH="./SecureBin/firmware_hash.bin"
 SIGNATURE="./SecureBin/signature.bin"
 
-VERIFIED_SIGNATURE="./SecureVerify/verified_signature.bin"
 VERIFIED_HASH="./SecureVerify/verified_hash.bin"
 EXTRACTED_FIRMWARE="./SecureVerify/firmware_extracted.bin"
 
@@ -39,7 +38,7 @@ echo "Signed firmware created: $SIGNED_BINARY"
 
 # Step 5: Verification on the Board Side
 echo "Extracting firmware and signature..."
-dd if="$SIGNED_BINARY" bs=1 count=256 skip=$(stat --format=%s "$BINARY_FILE") of="$VERIFIED_SIGNATURE"
+dd if="$SIGNED_BINARY" bs=1 count=256 skip=$(stat --format=%s "$BINARY_FILE") of="$SIGNATURE"
 dd if="$SIGNED_BINARY" bs=1 count=$(stat --format=%s "$BINARY_FILE") of="$EXTRACTED_FIRMWARE"
 
 # Step 6: Compute SHA-256 Hash of Extracted Firmware
@@ -48,7 +47,7 @@ openssl dgst -sha256 -binary "$EXTRACTED_FIRMWARE" > firmware_hash_verify.bin
 
 # Step 7: Verify the Signature
 echo "Verifying the signature..."
-openssl pkeyutl -verify -pubin -inkey "$PUBLIC_KEY" -in "$VERIFIED_SIGNATURE" -out "$VERIFIED_HASH"
+openssl pkeyutl -verify -pubin -inkey "$PUBLIC_KEY" -in "$SIGNATURE" -out "$VERIFIED_HASH"
 
 diff firmware_hash_verify.bin "$VERIFIED_HASH" && echo "Signature Valid!" || echo "Signature Invalid!"
 
