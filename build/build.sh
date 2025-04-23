@@ -90,7 +90,6 @@ dd if="$SIGNED_ENCRYPTED_BINARY" bs=1 count="$ENCRYPTED_FIRMWARE_SIZE" of="$EXTR
 # Decrypt the firmware
 echo "Decrypting firmware..."
 echo "AES_IV_KEY after decryption: $(cat $RECEIVED_AES_IV_KEY)"
-#openssl enc -aes-256-cbc -d -K $(cat "$AES_KEY") -iv "$RECEIVED_AES_IV_KEY" -in "$EXTRACTED_FIRMWARE" -out "$DECRYPTED_FIRMWARE"
 openssl enc -aes-256-cbc -d -K $(cat "$AES_KEY") -iv $(cat "$RECEIVED_AES_IV_KEY") -in "$EXTRACTED_FIRMWARE" -out "$DECRYPTED_FIRMWARE"
 # Step 6a: Compute SHA-256 Hash of Extracted Firmware
 echo "Computing hash of extracted firmware..."

@@ -70,7 +70,7 @@ unsigned long *vector_table[] =
         // Additional peripheral handlers...
 };
 
-// Reset handler
+// Reset handler, called when the system is reset or powered on
 void Reset_Handler(void) 
 {
     unsigned long *src, *dest;
@@ -95,59 +95,87 @@ void Reset_Handler(void)
     while (1);
 }
 
-// Default handler for interrupts
+// Default handler for interrupts that don't have a specific handler
 void Default_Handler(void) 
 {
     while (1);
 }
+
+/* Handler for Non-Maskable Interrupts (NMI) An NMI is a type of interrupt that
+ cannot be ignored or masked by the CPU, meaning that it will always be processed
+ immediately, regardless of the current state of the system. */
 void NMI_Handler(void) 
 {
     while (1);
 }
+
+// Handler for hard faults, which occur when the processor encounters an unrecoverable error
 void HardFault_Handler(void) 
 {
     while (1);
 }
+
+// Handler for memory management faults, such as invalid memory accesses
 void MemManage_Handler(void) 
 {
     while (1);
 }
+
+// Handler for bus faults, which occur when the processor encounters an error accessing memory or peripherals
 void BusFault_Handler(void) 
 {
     while (1);
 }
+
+// Handler for usage faults, which occur when the processor encounters an invalid instruction or operand
 void UsageFault_Handler(void) 
 {
     while (1);
 }
+
+// Handler for Supervisor Call (SVC) interrupts, used to request services from the operating system
 void SVC_Handler(void) 
 {
     while (1);
 }
+
+// Handler for debug monitor interrupts, used for debugging and testing
 void DebugMon_Handler(void) 
 {
     while (1);
 }
+
+// Handler for Pendable Service Call (PendSV) interrupts, used for scheduling and synchronization
 void PendSV_Handler(void) 
 {
     while (1);
 }
+
+// Handler for system tick interrupts, which occur at regular intervals
 void SysTick_Handler(void) 
 {
     while (1);
 }
+
+// Handler for External Interrupt 0, triggered by an external event
 void EXTI0_Handler(void) 
 {
     while (1);
 }
+
+// Handler for Timer 1 Update interrupts, triggered when the timer reaches a specific value
 void TIM1_UP_Handler(void) 
 {
     while (1);
 }
+
+// Handler for USART 1 interrupts, triggered by serial communication events
 void USART1_Handler(void) 
 {
     while (1);
 }
+
+// Handler for I2C 1 Event interrupts, triggered by I2C communication events
 void I2C1_EV_Handler(void) 
 {
     while (1);
