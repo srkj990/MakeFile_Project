@@ -2,6 +2,7 @@
 #include <string.h>
 #include "../include/sample1.h"
 // Forward declaration of the default handlers
+int main(void);
 void Reset_Handler(void);
 void Default_Handler(void);
 void NMI_Handler(void);

@@ -18,6 +18,13 @@ MEMORY
 
 }
 
+PHDRS
+{
+    flash PT_LOAD FLAGS(5);    /* Read + execute */
+    ram PT_LOAD FLAGS(6);      /* Read + write */
+    itcm PT_LOAD FLAGS(6);     /* Read + write */
+}
+
 /* Sections */
 SECTIONS 
 {
@@ -25,14 +32,14 @@ SECTIONS
     .isr_vector : 
     {
         KEEP(*(.isr_vector))
-    } > FLASH
+    } > FLASH :flash
 
     /* .text: Stores executable code and read-only data. */
     .text : 
     {
         *(.text*)
         *(.rodata*)   /* Read-only data */
-    } > FLASH
+    } > FLASH :flash
 
     /* Initialized data in RAM, loaded from FLASH */ /* .data: Initialized variables copied from FLASH to RAM during startup. */
     .data : 
@@ -40,16 +47,16 @@ SECTIONS
         _sdata = .;        /* Start of .data section in RAM */
         *(.data*)
         _edata = .;        /* End of .data section in RAM */
-    } > RAM AT > FLASH
+    } > RAM AT > FLASH :ram
 
     /* Uninitialized data (zero-initialized at runtime) */ /* .bss: Uninitialized variables (zero-initialized by the startup code). */
-    .bss : 
+    .bss (NOLOAD) : 
     {
         _sbss = .;         /* Start of .bss section */
         *(.bss*)
         *(COMMON)
         _ebss = .;         /* End of .bss section */
-    } > RAM
+    } > RAM :NONE
 
     /* Custom section for the array */
     .my_section :
@@ -57,7 +64,7 @@ SECTIONS
         _start_my_section = .;
         *(.my_section*)
         _end_my_section = .;
-    } > ITCM
+    } > ITCM :itcm
 
     /* heap definitions for FreeRTOS */
     __heap_size__ = 4K;

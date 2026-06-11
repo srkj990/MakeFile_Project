@@ -1,6 +1,9 @@
 #include "FreeRTOS.h"
 #include "task.h"
 #include "stdint.h"
+#include "sample1.h"
+#include "sample2.h"
+
 uint8_t ucHeap[ configTOTAL_HEAP_SIZE ];
 // Task function prototypes
 void vTask1(void *pvParameters);

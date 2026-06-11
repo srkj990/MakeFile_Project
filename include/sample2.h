@@ -1,2 +1,6 @@
-// Header file for input output functions
-#include <stdio.h>
+#ifndef SAMPLE2_H
+#define SAMPLE2_H
+
+int Sub_main1(void);
+
+#endif
