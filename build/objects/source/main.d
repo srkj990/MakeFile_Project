@@ -5,4 +5,5 @@ main.o: ../source/main.c ../FreeRTOS/Source/include/FreeRTOS.h \
  ../FreeRTOS/Source/include/deprecated_definitions.h \
  ../FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h \
  ../FreeRTOS/Source/include/mpu_wrappers.h \
- ../FreeRTOS/Source/include/task.h ../FreeRTOS/Source/include/list.h
+ ../FreeRTOS/Source/include/task.h ../FreeRTOS/Source/include/list.h \
+ ../include/sample1.h ../include/sample2.h
